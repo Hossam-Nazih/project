@@ -2,9 +2,9 @@ import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import Navigation from './components/Navigation';
 import Dashboard from './pages/Dashboard';
 import ProjectSubmission from './pages/ProjectSubmission';
-import ProjectHistory from './pages/Summarizer';
+import Summarizer from './pages/summarizer';
 import Chat from './pages/Chat';
-import PdfViewer from './components/PdfViewer'; // Import PdfViewer
+import PdfViewer from './components/PdfViewer';
 
 function App() {
   return (
@@ -20,9 +20,9 @@ function App() {
                   <Routes>
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/submit" element={<ProjectSubmission />} />
-                    <Route path="/summarize" element={<ProjectHistory />} />
+                    <Route path="/summarize" element={<Summarizer />} />
                     <Route path="/chat" element={<Chat />} />
-                    <Route path="/pdf/:docId" element={<PdfViewer />} /> {/* New route for PDF viewing */}
+                    <Route path="/pdf/:docId" element={<PdfViewer />} />
                     <Route path="/" element={<Navigate to="/dashboard" replace />} />
                   </Routes>
                 </main>

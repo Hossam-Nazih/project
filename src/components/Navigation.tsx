@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { BookOpen, FileText, History, Upload, User, Search, LogIn, UserPlus } from 'lucide-react';
+import { BookOpen, FileText, History, Upload, Search, MessageSquare } from 'lucide-react';
 
 export default function Navigation() {
   const location = useLocation();
@@ -48,7 +48,7 @@ export default function Navigation() {
               </Link>
 
               <Link
-                to="/history"
+                to="/summarize"
                 className={`flex items-center px-3 py-2 rounded-md text-sm font-medium ${
                   isActive('/summarize')
                     ? 'bg-indigo-100 text-indigo-700'
@@ -56,7 +56,7 @@ export default function Navigation() {
                 }`}
               >
                 <History className="h-5 w-5 mr-1" />
-                summarizer
+                Résumés
               </Link>
 
               <Link
@@ -67,8 +67,8 @@ export default function Navigation() {
                     : 'text-gray-600 hover:bg-gray-50'
                 }`}
               >
-                {/*<MessageSquare className="h-5 w-5 mr-1" />
-                Chat IA*/}
+                <MessageSquare className="h-5 w-5 mr-1" />
+                Chat IA
               </Link>
             </div>
           </div>
