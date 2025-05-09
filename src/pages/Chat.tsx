@@ -1,32 +1,16 @@
+// src/pages/Chat.tsx - Fixed version
+
 import React, { useState } from 'react';
 import { Send, Bot } from 'lucide-react';
-
-async function askQuestion(docId: string, question: string) {
-  try {
-    const response = await fetch('http://127.0.0.1:8000/ask/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ document_id: docId, question: question }), // Fix here
-    });
-    if (!response.ok) {
-      throw new Error(`Error: ${response.statusText}`);
-    }
-    return response.json(); // Assuming the backend returns JSON
-  } catch (error) {
-    console.error("Error fetching response:", error);
-    return { answer: "Désolé, je n'ai pas pu répondre à votre question." };
-  }
-}
-
+import { askQuestion } from '../api/api';
 
 export default function Chat() {
   const [messages, setMessages] = useState([
-    { id: 1, text: "Bonjour Mouad, je suis votre assistant IA. Comment puis-je vous aider avec votre projet?", sender: "bot" },
+    { id: 1, text: "Bonjour, je suis votre assistant IA. Comment puis-je vous aider avec votre projet?", sender: "bot" },
   ]);
   const [newMessage, setNewMessage] = useState('');
-  const [docId, setDocId] = useState('');  // State for the document ID
+  const [docId, setDocId] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,18 +20,34 @@ export default function Chat() {
         ...prevMessages,
         { id: Date.now(), text: newMessage, sender: "user" },
       ]);
+      
+      const userQuestion = newMessage;
       setNewMessage('');
+      setIsLoading(true);
 
       try {
-        // Get the bot's response
-        const result = await askQuestion(docId, newMessage); // Use the dynamic docId
+        // Get the bot's response using the fixed askQuestion function
+        const result = await askQuestion(docId, userQuestion);
         setMessages((prevMessages) => [
           ...prevMessages,
-          { id: Date.now() + 1, text: result.answer || "Je n'ai pas trouvé de réponse.", sender: "bot" },
+          { 
+            id: Date.now() + 1, 
+            text: result.answer || "Je n'ai pas trouvé de réponse.", 
+            sender: "bot" 
+          },
         ]);
       } catch (error) {
         console.error("Error fetching response:", error);
-        // Optionally, you could display an error message in the chat
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          { 
+            id: Date.now() + 1, 
+            text: "Désolé, une erreur s'est produite lors de la recherche de réponse.", 
+            sender: "bot" 
+          },
+        ]);
+      } finally {
+        setIsLoading(false);
       }
     }
   };
@@ -95,12 +95,20 @@ export default function Chat() {
               onChange={(e) => setNewMessage(e.target.value)}
               placeholder="Écrivez votre message..."
               className="flex-1 rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              disabled={isLoading}
             />
             <button
               type="submit"
-              className="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              className={`inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${
+                isLoading ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
+              disabled={isLoading}
             >
-              <Send className="h-4 w-4" />
+              {isLoading ? (
+                <div className="w-4 h-4 border-2 border-t-2 border-white border-solid rounded-full animate-spin"></div>
+              ) : (
+                <Send className="h-4 w-4" />
+              )}
             </button>
           </form>
         </div>

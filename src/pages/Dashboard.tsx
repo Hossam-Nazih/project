@@ -1,3 +1,5 @@
+// src/pages/Dashboard.tsx - Fixed version
+
 import React, { useEffect, useState } from 'react';
 import { BookOpen } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -7,7 +9,7 @@ import { HealthStatus } from '../components/HealthStatus';
 // Define a proper interface for document objects
 interface Document {
   _id: string;
-  name: string;
+  name?: string;
   filename?: string;
   uploadDate?: string;
 }
@@ -24,7 +26,7 @@ export default function Dashboard() {
         setLoading(true);
         const data = await fetchDocuments();
         console.log("Fetched documents:", data);
-        setDocuments(data);
+        setDocuments(Array.isArray(data) ? data : []);
         setError(null);
       } catch (err) {
         console.error('Error fetching documents:', err);
@@ -35,7 +37,28 @@ export default function Dashboard() {
     };
 
     getDocuments();
+    
+    // Set up interval to periodically refresh documents
+    const intervalId = setInterval(getDocuments, 30000); // Refresh every 30 seconds
+    
+    // Clean up interval on component unmount
+    return () => clearInterval(intervalId);
   }, []);
+
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return 'Date inconnue';
+    try {
+      return new Date(dateString).toLocaleDateString('fr-FR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (e) {
+      return 'Date invalide';
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -52,7 +75,15 @@ export default function Dashboard() {
               <p className="mt-2 text-sm text-gray-500">Chargement des documents...</p>
             </div>
           ) : error ? (
-            <div className="px-4 py-6 text-center text-red-500">{error}</div>
+            <div className="px-4 py-6 text-center">
+              <p className="text-red-500">{error}</p>
+              <button 
+                onClick={() => fetchDocuments()}
+                className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+              >
+                Réessayer
+              </button>
+            </div>
           ) : (
             <ul className="divide-y divide-gray-200">
               {documents.length > 0 ? (
@@ -72,10 +103,24 @@ export default function Dashboard() {
                           </Link>
                           {doc.uploadDate && (
                             <p className="text-xs text-gray-500">
-                              Uploadé le: {new Date(doc.uploadDate).toLocaleDateString()}
+                              Uploadé le: {formatDate(doc.uploadDate)}
                             </p>
                           )}
                         </div>
+                      </div>
+                      <div className="flex space-x-2">
+                        <Link
+                          to={`/summarize?docId=${doc._id}`}
+                          className="text-xs px-2 py-1 bg-purple-100 text-purple-700 rounded-full hover:bg-purple-200"
+                        >
+                          Résumer
+                        </Link>
+                        <Link
+                          to={`/chat?docId=${doc._id}`}
+                          className="text-xs px-2 py-1 bg-indigo-100 text-indigo-700 rounded-full hover:bg-indigo-200"
+                        >
+                          Chat
+                        </Link>
                       </div>
                     </div>
                   </li>

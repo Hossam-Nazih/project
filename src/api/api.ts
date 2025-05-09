@@ -1,3 +1,5 @@
+// src/api/api.ts fixes
+
 import axios from 'axios';
 
 const api = axios.create({
@@ -5,16 +7,21 @@ const api = axios.create({
 });
 
 export async function uploadPDF(file: File) {
-  const formData = new FormData()
-  formData.append('file', file)
+  try {
+    const formData = new FormData()
+    formData.append('file', file)
 
-  const response = await api.post('/upload/', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  })
+    const response = await api.post('/upload/', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
 
-  return response.data // contient id, filename, preview
+    return response.data // contains id, filename, preview
+  } catch (error) {
+    console.error('Error uploading PDF:', error);
+    throw error; // Make sure we're properly propagating errors
+  }
 }
 
 // === 2. Ask a question ===
@@ -26,27 +33,15 @@ interface AskResponse {
 
 export async function askQuestion(docId: string, question: string): Promise<AskResponse> {
   try {
-    const response = await fetch('http://127.0.0.1:8000/ask/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        docId,
-        question,
-      }),
+    // Fix the request payload format - use document_id instead of docId
+    const response = await api.post('/ask/', {
+      document_id: docId,
+      question,
     });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      const message = errorData.detail || response.statusText || 'Une erreur est survenue.';
-      throw new Error(`Erreur serveur: ${message}`);
-    }
-
-    const data = await response.json();
-    return data;
+    
+    return response.data;
   } catch (error) {
-    console.error('Erreur dans askQuestion:', error);
+    console.error('Error in askQuestion:', error);
     throw error;
   }
 }
@@ -54,21 +49,35 @@ export async function askQuestion(docId: string, question: string): Promise<AskR
 
 // === 3. List documents ===
 export async function fetchDocuments() {
-  const response = await api.get('/documents/')
-  return response.data // liste de documents
+  try {
+    const response = await api.get('/documents/')
+    return response.data // document list
+  } catch (error) {
+    console.error('Error fetching documents:', error);
+    throw error;
+  }
 }
 
-// === 4. Résumé local d’un document ===
+// === 4. Local document summary ===
 export async function summarizeDocument(documentId: string) {
-  const response = await api.get(`/summarize/${documentId}`)
-
-  return response.data // contient summary
+  try {
+    const response = await api.get(`/summarize/${documentId}`)
+    return response.data // contains summary
+  } catch (error) {
+    console.error('Error summarizing document:', error);
+    throw error;
+  }
 }
 
 // === 5. Health check ===
 export async function checkHealth() {
-  const response = await api.get('/health')
-  return response.data
+  try {
+    const response = await api.get('/health')
+    return response.data
+  } catch (error) {
+    console.error('Error checking health:', error);
+    return { message: "Le serveur est injoignable." };
+  }
 }
 
 export default api;
