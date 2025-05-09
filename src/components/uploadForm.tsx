@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { uploadPDF } from '../api/api'
+import { uploadPDF } from '../api'
 
 export function UploadForm() {
   const [file, setFile] = useState<File | null>(null)
@@ -9,8 +9,7 @@ export function UploadForm() {
     if (!file) return
     try {
       const result = await uploadPDF(file)
-      setMessage(`Fichier "${result.filename}" uploadé !`)
-
+      setMessage(Fichier "${result.filename}" uploadé !)
     } catch {
       setMessage("Erreur lors de l'upload")
     }

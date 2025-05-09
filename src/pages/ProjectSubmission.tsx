@@ -1,8 +1,6 @@
-// src/pages/ProjectSubmission.tsx - Fixed version
-
 import React, { useState } from 'react';
 import { Upload, X, File, Check } from 'lucide-react';
-import { uploadPDF } from '../api/api';
+import { uploadPDF } from '../api/api'; // Make sure this path is correct
 
 export default function ProjectSubmission() {
   const [files, setFiles] = useState<File[]>([]);
@@ -10,8 +8,6 @@ export default function ProjectSubmission() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [message, setMessage] = useState<string | null>(null);
-  const [messageType, setMessageType] = useState<'success' | 'error' | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -43,37 +39,21 @@ export default function ProjectSubmission() {
   };
 
   const handleSubmit = async () => {
-    // Validate inputs
     if (!title || !description || files.length === 0) {
       setMessage('Veuillez remplir tous les champs et ajouter au moins un fichier PDF.');
-      setMessageType('error');
       return;
     }
 
-    setIsSubmitting(true);
-    setMessage('Soumission en cours...');
-    setMessageType(null);
-
     try {
-      // Track successful uploads
-      const uploadResults = [];
-      
       for (const file of files) {
-        const result = await uploadPDF(file);
-        uploadResults.push(result);
+        await uploadPDF(file); // Call your API to upload each PDF
       }
-      
       setMessage('Projet soumis avec succès !');
-      setMessageType('success');
       setFiles([]);
       setTitle('');
       setDescription('');
     } catch (error) {
-      console.error('Error submitting project:', error);
-      setMessage("Erreur lors de la soumission du projet. Veuillez réessayer.");
-      setMessageType('error');
-    } finally {
-      setIsSubmitting(false);
+      setMessage("Erreur lors de la soumission du projet.");
     }
   };
 
@@ -91,7 +71,6 @@ export default function ProjectSubmission() {
               onChange={(e) => setTitle(e.target.value)}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
               placeholder="Entrez le titre de votre projet"
-              disabled={isSubmitting}
             />
           </div>
 
@@ -103,7 +82,6 @@ export default function ProjectSubmission() {
               onChange={(e) => setDescription(e.target.value)}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
               placeholder="Décrivez votre projet..."
-              disabled={isSubmitting}
             />
           </div>
 
@@ -130,7 +108,6 @@ export default function ProjectSubmission() {
                       multiple
                       accept="application/pdf"
                       onChange={handleFileInput}
-                      disabled={isSubmitting}
                     />
                   </label>
                 </p>
@@ -149,7 +126,6 @@ export default function ProjectSubmission() {
                   <button
                     onClick={() => removeFile(index)}
                     className="text-red-500 hover:text-red-700"
-                    disabled={isSubmitting}
                   >
                     <X className="h-5 w-5" />
                   </button>
@@ -159,28 +135,16 @@ export default function ProjectSubmission() {
           )}
 
           {message && (
-            <p className={`text-sm text-center ${
-              messageType === 'success' ? 'text-green-600' : 
-              messageType === 'error' ? 'text-red-600' : 'text-gray-600'
-            }`}>
-              {message}
-            </p>
+            <p className="text-sm text-center text-indigo-600">{message}</p>
           )}
 
           <div className="flex justify-end">
             <button
               type="button"
               onClick={handleSubmit}
-              disabled={isSubmitting}
-              className={`inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${
-                isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
+              className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
-              {isSubmitting ? (
-                <div className="mr-2 w-4 h-4 border-2 border-t-2 border-white border-solid rounded-full animate-spin" />
-              ) : (
-                <Check className="h-4 w-4 mr-2" />
-              )}
+              <Check className="h-4 w-4 mr-2" />
               Soumettre le projet
             </button>
           </div>

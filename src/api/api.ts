@@ -6,23 +6,21 @@ const api = axios.create({
     baseURL: 'http://localhost:8000',
 });
 
-export async function uploadPDF(file: File) {
-  try {
-    const formData = new FormData()
-    formData.append('file', file)
+export const uploadPDF = async (file: File) => {
+  const formData = new FormData();
+  formData.append('file', file);
 
-    const response = await api.post('/upload/', formData, {
+  try {
+    const response = await axios.post('http://localhost:8000/upload', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
-    })
-
-    return response.data // contains id, filename, preview
+    });
+    return response.data; // Assuming the response contains success data
   } catch (error) {
-    console.error('Error uploading PDF:', error);
-    throw error; // Make sure we're properly propagating errors
+    throw new Error('Error uploading file');
   }
-}
+};
 
 // === 2. Ask a question ===
 interface AskResponse {

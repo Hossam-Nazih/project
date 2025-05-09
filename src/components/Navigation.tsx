@@ -1,6 +1,7 @@
+// src/components/Navigation.tsx
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { BookOpen, FileText, History, Upload, Search, MessageSquare } from 'lucide-react';
+import { BookOpen, FileText, History, Upload, MessageSquare, Search } from 'lucide-react';
 
 export default function Navigation() {
   const location = useLocation();
@@ -10,6 +11,7 @@ export default function Navigation() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Searching for:', searchQuery);
+    // Implement search functionality here
   };
 
   return (
@@ -56,7 +58,7 @@ export default function Navigation() {
                 }`}
               >
                 <History className="h-5 w-5 mr-1" />
-                Résumés
+                Résumé
               </Link>
 
               <Link
